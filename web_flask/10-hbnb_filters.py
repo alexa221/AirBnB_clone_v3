@@ -1,26 +1,27 @@
 #!/usr/bin/python3
-"""Module: Starts a Flask web app and fetches data from storage engine"""
+"""
+starts a Flask web application
+"""
+
 from flask import Flask, render_template
-from models import storage, State, Amenity 
-
-
+from models import *
+from models import storage
 app = Flask(__name__)
 
 
+@app.route('/hbnb_filters', strict_slashes=False)
+def filters():
+    """display a HTML page like 6-index.html from static"""
+    states = storage.all("State").values()
+    amenities = storage.all("Amenity").values()
+    return render_template('10-hbnb_filters.html', states=states,
+                           amenities=amenities)
+
+
 @app.teardown_appcontext
-def close_session(cls):
-    """Closes session"""
+def teardown_db(exception):
+    """closes the storage on teardown"""
     storage.close()
 
-
-@app.route('/hbnb_filters', strict_slashes=False)
-def states_state(id=None):
-    """displays a HTML page like 6-index.html"""
-    states = storage.all(State)
-    amenities = storage.all(Amenity)
-    return render_template('10-hbnb_filters.html', **locals())
-
-
 if __name__ == '__main__':
-    storage.reload()
-    app.run("0.0.0.0", 5000)
+    app.run(host='0.0.0.0', port='5000')
